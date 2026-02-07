@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Danh Sách Blog</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* CSS chỉnh cho đẹp hơn */
+        .blog-card { transition: transform 0.2s; }
+        .blog-card:hover { transform: translateY(-2px); box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important; }
+        .blog-image {
+            width: 150px;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+        /* Tự động ẩn thông báo sau 3 giây */
+        .alert-fade { animation: fadeOut 1s forwards; animation-delay: 3s; }
+        @keyframes fadeOut { to { opacity: 0; visibility: hidden; } }
+    </style>
+</head>
+<body class="bg-light">
+
+<div class="container mt-5 mb-5">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="text-primary fw-bold">Danh Sách Blog</h2>
+        <a th:href="@{/blog-home}" class="btn btn-primary shadow-sm">+ Viết bài mới</a>
+    </div>
+
+    <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show alert-fade" role="alert">
+        <i class="bi bi-check-circle-fill"></i> <span th:text="${successMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <div th:if="${blogList.isEmpty()}" class="alert alert-warning text-center">
+        Chưa có bài viết nào!
+    </div>
+
+    <div th:each="blog, stat : ${blogList}" class="card mb-4 shadow-sm border-0 blog-card">
+        <div class="card-header bg-white border-bottom-0 d-flex justify-content-between pt-3 pb-0">
+            <div>
+                <span class="badge bg-primary rounded-pill me-2" th:text="${'#' + stat.count}"></span>
+                <strong class="text-dark fs-5" th:text="${blog.userName}"></strong>
+            </div>
+            <small class="text-muted" th:text="${blog.createdTime}"></small>
+        </div>
+
+        <div class="card-body">
+            <form th:action="@{/update}" method="post">
+                <input type="hidden" name="userId" th:value="${blog.userID}">
+                <input type="hidden" name="blogId" th:value="${blog.blogId}">
+
+                <div class="row g-3">
+
+                    <div class="col-12 col-md-auto d-flex justify-content-center align-items-start">
+                        <div th:if="${blog.file != null and !blog.file.isEmpty()}">
+                            <img th:src="@{'/images/' + ${blog.file}}"
+                                 class="blog-image border shadow-sm"
+                                 alt="Blog Image"
+                                 onclick="window.open(this.src)"
+                                 title="Click để phóng to"
+                                 style="cursor: pointer;">
+                        </div>
+                        <div th:if="${blog.file == null or blog.file.isEmpty()}"
+                             class="d-flex align-items-center justify-content-center bg-light rounded border"
+                             style="width: 150px; height: 150px; color: #ccc;">
+                            <span>No Image</span>
+                        </div>
+                    </div>
+
+                    <div class="col">
+                        <label class="form-label text-muted small fw-bold">Nội dung:</label>
+                        <textarea name="content"
+                                  class="form-control bg-white border h-100 shadow-sm"
+                                  style="min-height: 120px; resize: none;"
+                                  th:text="${blog.content}"></textarea>
+                    </div>
+
+                    <div class="col-12 col-md-auto d-flex flex-md-column justify-content-center gap-2">
+                        <button type="submit" class="btn btn-warning fw-bold text-dark w-100">
+                            Cập nhật
+                        </button>
+
+                        <a th:href="@{/delete(blogId=${blog.blogId}, userId=${blog.userID})}"
+                           class="btn btn-outline-danger fw-bold w-100"
+                           onclick="return confirm('Xóa bài viết này?');">
+                            Xóa
+                        </a>
+                    </div>
+                </div> </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
